@@ -11,6 +11,7 @@ from telegram.ext import (
     ContextTypes,
     ConversationHandler
 )
+from telegram.ext import MessageHandler, filters
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -501,6 +502,12 @@ async def profile_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(profile_text)
 
 
+async def log_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.message and update.message.text:
+        logger.info(f"Получено сообщение: {update.message.text}")
+    return True
+
+
 def main():
     application = Application.builder().token(TOKEN).build()
 
@@ -527,6 +534,8 @@ def main():
         fallbacks=[CommandHandler('cancel', cancel)]
     )
 
+    application.add_handler(MessageHandler(
+        filters.TEXT, log_message), group=-1)
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(conv_profile)
